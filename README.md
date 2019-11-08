@@ -3,7 +3,7 @@ A plug-in for Xcode，quick managing import header file for OC
 
 
 ### 功能介绍
-插件是居于Xcode8以后提供的模版做的。主要有以下两个功能：
+插件是居于Xcode8以后提供的模版做的。参考[EasyCode-Xcode](https://github.com/music4kid/EasyCode-Xcode)，主要有以下两个功能：
 > - import insert：选中类，快速引入该类头文件
 > - import arrange：一键排序引入头文件
 
