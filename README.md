@@ -14,7 +14,7 @@ A plug-in for Xcode，quick managing import header file for OC
 
 ### 如何使用
 
-**1、 将文件目录下的JZImport.app（也可以编译工程生产）移动到应用程序文件夹下并打开，然后到 `系统偏好设置->扩展->Xcode Source Editor` 勾选☑️JZImport **
+**1、 将文件目录下的JZImport.app（也可以编译工程生产）移动到应用程序文件夹下并打开，然后到 `系统偏好设置->扩展->Xcode Source Editor` 勾选☑️JZImport**
 <img src="https://upload-images.jianshu.io/upload_images/1678677-ec59571ace6b6350.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 **2、 打开Xcode，打开任意工程，在工具菜单栏 `Editor` 最下面可以看到 `JZImportExtension` ，即可使用插件的两个功能**
