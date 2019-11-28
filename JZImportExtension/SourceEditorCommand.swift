@@ -22,6 +22,7 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
     }
     
     func performArrange(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
+        // get import lines
         let linesToSort = invocation.buffer.lines.filter { line in
             if case let lineStr as String = line {
                 return lineStr.hasPrefix("#import") || lineStr.hasPrefix("@import")
@@ -35,13 +36,17 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             return
         }
 
-        let firstLineIndex = invocation.buffer.lines.index(of: linesToSort[0]) // For insert
+        // get first line For insert
+        let firstLineIndex = invocation.buffer.lines.index(of: linesToSort[0])
 
+        // remove -> sort -> reinsert
         invocation.buffer.lines.removeObjects(in: linesToSort)
         let linesSorted = (linesToSort as? [String] ?? []).sorted() {$0 <= $1}
         linesSorted.reversed().forEach { (line) in
             invocation.buffer.lines.insert(line, at: firstLineIndex)
         }
+        
+        // select sort lines
         let selectionsUpdated: [XCSourceTextRange] = (0..<linesSorted.count).map { (index) in
             let lineIndex = firstLineIndex + index
             let endColumn = linesSorted[index].count - 1
@@ -54,28 +59,29 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
     
     func performInsert(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
         
-        guard let selection : XCSourceTextRange = invocation.buffer.selections.firstObject as? XCSourceTextRange else {
+        // get selection, simply assert is right
+        guard let selectRange : XCSourceTextRange = invocation.buffer.selections.firstObject as? XCSourceTextRange else {
             let error = NSError(domain: "no availibale selection, pls select import class name", code: 0, userInfo: nil)
             completionHandler(error)
             return
         }
         
-        if selection.start.line != selection.end.line || selection.start.column >= selection.end.column {
+        if selectRange.start.line != selectRange.end.line || selectRange.start.column >= selectRange.end.column {
             let error = NSError(domain: "no availibale selection, pls select import class name", code: 0, userInfo: nil)
             completionHandler(error)
             return
         }
         
+        // get select string
         let lines = invocation.buffer.lines
-        let curLine : String = lines[selection.start.line] as! String
-        let startSlicingIndex = curLine.index(curLine.startIndex, offsetBy: selection.start.column)
-        let endSlicingIndex = curLine.index(curLine.startIndex, offsetBy: selection.end.column-1)
+        let curLine : String = lines[selectRange.start.line] as! String
+        let startSlicingIndex = curLine.index(curLine.startIndex, offsetBy: selectRange.start.column)
+        let endSlicingIndex = curLine.index(curLine.startIndex, offsetBy: selectRange.end.column-1)
         let selectStr = curLine[startSlicingIndex...endSlicingIndex]
         let insertImportStr = "#import \"\(selectStr).h\""
         
-        // insert import
+        // find last import location, insert after
         var insertIndex = 0
-        
         for i in (0...lines.count-1).reversed() {
             let line : String = lines[i] as! String
             if line.hasPrefix("#import") {
@@ -98,10 +104,11 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
             }
         }
         
+        // insert line at right place
         lines.insert(insertImportStr, at: insertIndex)
         
         // insert success, clear selections
-        let endPosition = XCSourceTextPosition(line: selection.end.line, column: selection.end.column)
+        let endPosition = XCSourceTextPosition(line: selectRange.end.line, column: selectRange.end.column)
         let range = XCSourceTextRange(start: endPosition, end: endPosition)
         invocation.buffer.selections.setArray([range])
         
